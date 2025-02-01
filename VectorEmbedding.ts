@@ -1,48 +1,22 @@
 export class VectorEmbedding {
     components: VECTOR_COMP_VALS[] = [];
 
-    constructor() {
-        this.init();
+    constructor(embeddings: VECTOR_COMP_VALS[], attributes?: [VECTOR_COMPS, VECTOR_COMP_VALS][]) {
+        this.init(embeddings, attributes);
     }
 
-    init() {
-        this.components = [
-            // VECTOR_COMPS.JS,
-            VECTOR_COMP_VALS.NOTHING,
+    /**
+     * Create a components list and add any passed component data if needed
+     * @param attributes A list of components that will be set to the main components list
+     */
+    init(embeddings: VECTOR_COMP_VALS[], attributes?: [VECTOR_COMPS, VECTOR_COMP_VALS][] | undefined) {
+        const comp = this.components = embeddings;
 
-            // VECTOR_COMPS.EXPRESSJS,
-            VECTOR_COMP_VALS.NOTHING,
-            // VECTOR_COMPS.NODEJS,
-            VECTOR_COMP_VALS.NOTHING,
-            // VECTOR_COMPS.NESTJS,
-            VECTOR_COMP_VALS.NOTHING,
-            // VECTOR_COMPS.NEXTJS,
-            VECTOR_COMP_VALS.NOTHING,
-            // VECTOR_COMPS.REACTJS,
-            VECTOR_COMP_VALS.NOTHING,
-            // VECTOR_COMPS.VUEJS,
-            VECTOR_COMP_VALS.NOTHING,
-            // VECTOR_COMPS.ANGULAR,
-            VECTOR_COMP_VALS.NOTHING,
+        attributes?.forEach(valPair => {
+            const [ix, val] = valPair;
 
-            // VECTOR_COMPS.JAVA,
-            VECTOR_COMP_VALS.NOTHING,
-
-            // VECTOR_COMPS.SPRINGBOOT,
-            VECTOR_COMP_VALS.NOTHING,
-
-            // VECTOR_COMPS.CSHARP,
-            VECTOR_COMP_VALS.NOTHING,
-
-            // VECTOR_COMPS.POSTGRESQL,
-            VECTOR_COMP_VALS.NOTHING,
-            // VECTOR_COMPS.SQLITE,
-            VECTOR_COMP_VALS.NOTHING,
-            // VECTOR_COMPS.MYSQL,
-            VECTOR_COMP_VALS.NOTHING,
-            // VECTOR_COMPS.MONGODB,
-            VECTOR_COMP_VALS.NOTHING,
-        ]
+            this.setComp(ix, val);
+        });
     }
 
     /**
@@ -62,12 +36,46 @@ export class VectorEmbedding {
 
         if (relations) {
             for (const prop in relations) {
-                this.components[prop] = relations[prop];
+                this.components[prop] = Math.max(relations[prop], this.components[prop]);
             }
         }
 
         // To allow chaining
         return this;
+    }
+
+    /**
+     * Resets all components to zero
+     */
+    reset() {
+        this.init([]);
+    }
+
+    /**
+     * 
+     * @returns Returns an array whose length is 1
+     */
+    normalize() {
+        
+        const magnitude = Math.hypot(...this.components);
+        
+        const normalizedArr = this.components.map(val => val / magnitude);
+        
+        return normalizedArr;
+    }
+
+    dot(otherVector: VectorEmbedding) {
+        const comps = this.normalize();
+
+        const otherComponents = otherVector.normalize();
+        
+        if (comps.length != otherComponents.length) {
+            throw new Error('Embeddings have different dimensions');
+        }
+
+        return comps.map((val, ix) => {
+            return val * otherComponents[ix];
+        }).reduce((a, b) => a + b, 0);
     }
 }
 
