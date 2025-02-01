@@ -6,7 +6,7 @@ This project tests out how to write a vector embedding that can sort candidates 
 
 ...you'll need it.
 
-Install it here: https://bun.sh/docs/installation
+How to install Bunjs: https://bun.sh/docs/installation
 
 ## Running the test
 
