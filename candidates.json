@@ -11,6 +11,21 @@
         "mysql": 1
     },
     {
+        "js": 10,
+        "reactjs": 6,
+        "nodejs": 8,
+        "mysql": 1,
+        "c#": 5,
+        "java": 2,
+        "springboot": 1
+    },
+    {
+        "reactjs": 7
+    },
+    {
+        "nodejs": 7
+    },
+    {
         "java": 2,
         "springboot": 1
     },
