@@ -1,3 +1,5 @@
+export const TEMPERATURE = 8;
+
 export class VectorEmbedding {
     components: VECTOR_COMP_VALS[] = [];
 
@@ -56,26 +58,35 @@ export class VectorEmbedding {
      * @returns Returns an array whose length is 1
      */
     normalize() {
-        
+
         const magnitude = Math.hypot(...this.components);
-        
+
         const normalizedArr = this.components.map(val => val / magnitude);
-        
+
         return normalizedArr;
     }
 
     dot(otherVector: VectorEmbedding) {
-        const comps = this.normalize();
+        const comps = this.components.concat([]);
 
-        const otherComponents = otherVector.normalize();
-        
+        const otherComponents = otherVector.components.concat([]);
+
+        // Check if anything has been set and make it bigger then renormalize
+        comps.map((val, ix) => {
+            const otherComponentsVal = otherComponents[ix];
+
+            if (otherComponentsVal > 0) {
+                comps[ix] *= TEMPERATURE;
+            }
+        });
+
         if (comps.length != otherComponents.length) {
             throw new Error('Embeddings have different dimensions');
         }
 
         return comps.map((val, ix) => {
             return val * otherComponents[ix];
-        }).reduce((a, b) => a + b, 0);
+        }).reduce((a, b) => a + b, 0) / (Math.hypot(...comps) * Math.hypot(...otherComponents));
     }
 }
 
