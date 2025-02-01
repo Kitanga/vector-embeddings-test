@@ -1,3 +1,5 @@
+// TODO: Please note that this is for testing not a final code state
+
 import { VECTOR_COMP_VALS, VECTOR_COMPS, VectorEmbedding } from "./VectorEmbedding";
 
 import data from "./candidates.json";
@@ -91,13 +93,58 @@ export function createEmbedding(arr?: [number, number][]) {
 }
 
 export function getResults(vector: VectorEmbedding, vectorList: VectorEmbedding[]) {
-    return vectorList
-        .map(vec => vec.dot(vector))
-        .map((val, ix) => ({
-            val,
-            ix,
-        }))
-        .sort((a, b) => b.val - a.val);
+    const scores: { ix: number; score: number, experienceScore: number }[] = new Array(vectorList.length);
+
+    const targetCompIXs: VECTOR_COMPS[] = [];
+
+    vector.components.forEach((val, ix) => {
+        if (val > 0) {
+            targetCompIXs.push(ix);
+        }
+    });
+
+    for (let ix = 0, length = vectorList.length; ix < length; ix++) {
+        const vec = vectorList[ix];
+
+        const dot = vec.dot(vector);
+
+        const experienceScore = calcExperienceScore(vec, targetCompIXs);
+
+        console.log('experience:', experienceScore)
+
+        let score = dot + experienceScore;
+
+        scores[ix] = {
+            ix: ix,
+            score,
+            experienceScore
+        };
+    }
+
+    return scores.sort((a, b) => b.score - a.score);
+}
+
+function calcExperienceScore(vector: VectorEmbedding, targetCompIXs: VECTOR_COMPS[]) {
+    return vector.components.reduce((a, b, ix) => {
+        if (targetCompIXs.includes(ix)) {
+            switch (b) {
+                case VECTOR_COMP_VALS.NOTHING:
+                    return a + 0;
+                case VECTOR_COMP_VALS.MIGHT_KNOW:
+                    return a + 0.14;
+                case VECTOR_COMP_VALS.BEGINNER:
+                    return a + 0.52;
+                case VECTOR_COMP_VALS.INTERMEDIATE:
+                    return a + 0.86;
+                case VECTOR_COMP_VALS.EXPERT:
+                    return a + 1;
+                default:
+                    return a + b;
+            }
+        } else {
+            return a;
+        }
+    }, 0);
 }
 
 console.log('candidates:', candidates);
@@ -105,5 +152,7 @@ console.log('candidates:', candidates);
 const job = createEmbedding([
     [VECTOR_COMPS.JS, VECTOR_COMP_VALS.BEGINNER],
 ]);
+
+console.log('job:', job);
 
 console.log('test:', getResults(job, candidates));
