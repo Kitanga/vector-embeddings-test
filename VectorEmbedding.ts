@@ -71,6 +71,7 @@ export class VectorEmbedding {
 
         const otherComponents = otherVector.components.concat([]);
 
+        // TODO: you might want to use softmax here
         // Check if anything has been set and make it bigger then renormalize
         comps.map((val, ix) => {
             const otherComponentsVal = otherComponents[ix];
