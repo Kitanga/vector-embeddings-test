@@ -91,17 +91,13 @@ export function createEmbedding(arr?: [number, number][]) {
 }
 
 export function getResults(vector: VectorEmbedding, vectorList: VectorEmbedding[]) {
-    const finalVal = vectorList
+    return vectorList
         .map(vec => vec.dot(vector))
         .map((val, ix) => ({
             val,
             ix,
         }))
         .sort((a, b) => b.val - a.val);
-
-    console.log('Sorted list of dot products:', finalVal);
-
-    return finalVal.map(obj => vectorList[obj.ix]);
 }
 
 console.log('candidates:', candidates);
